@@ -24,3 +24,6 @@ name, index
 ## sample machine learning.py
 해당 데이터로 학습을 하는 프로그램 입니다.
 색깔을 지정해주면 제일 근접한 색깔의 이름을 출력합니다.
+
+### 실행화면
+![alt text](1.png)

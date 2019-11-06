@@ -2,6 +2,13 @@ f_co = open('colors.dat', 'r')
 s = f_co.read().split('\n')
 f_co.close()
 
+import pygame
+from pygame.locals import *
+pygame.init()
+pygame.font.init()
+myfont = pygame.font.SysFont('Comic Sans MS', 30)
+surf = pygame.display.set_mode((448,400))
+
 
 class ColorData:
     def __init__(self,r,g,b, i):
@@ -50,8 +57,7 @@ for _ in cor_data:
 
 #============================================================
 
-import tensorflow as tf
-
+import tensorflow.compat.v1 as tf
 
 learning_rate = 0.02
 num_steps = 1500
@@ -105,7 +111,7 @@ sess = tf.Session()
 sess.run(init)
 last_ac = 0
 step = 0
-while last_ac < 0.9:
+while last_ac < 0.97:
     step += 1
     sess.run(train_op, feed_dict={X: batch_x, Y: batch_y})
     if step % display_step == 0 or step == 1:
@@ -120,8 +126,46 @@ print("Optimization Finished!")
 
 print("Testing Accuracy:", sess.run(accuracy, feed_dict={X: batch_x, Y: batch_y}))
 
-while True:
-    s = input('r,g,b>>').split(',')
-    _ = [float(s[0]), float(s[1]), float(s[2])]
-    d = np.argmax(sess.run(logits, feed_dict={X: [_]}))
-    print(int(_[0]), int(_[1]) , int(_[2]) ,cor_name[d])
+run = True
+r = 255
+g = 255
+b = 255
+_ = [float(r), float(g), float(b)]
+d = np.argmax(sess.run(logits, feed_dict={X: [_]}))
+text = myfont.render(cor_name[d], False, (255, 255, 255))
+
+while run:
+    for ev in pygame.event.get():
+        if ev.type == QUIT:
+            pygame.quit()
+            run = False
+        elif ev.type == MOUSEBUTTONDOWN:
+            x, y = pygame.mouse.get_pos()
+            if 400 <= x < 416:
+                r = int(255 - y / 400 * 255)
+            if 416 <= x < 432:
+                g = int(255 - y / 400 * 255)
+            if 432 <= x < 448:
+                b = int(255 - y / 400 * 255)
+            _ = [float(r), float(g), float(b)]
+            d = np.argmax(sess.run(logits, feed_dict={X: [_]}))
+            text = myfont.render(cor_name[d], False, (255, 255, 255))    
+            
+    surf.fill((0, 0, 0))
+
+    size = text.get_size()
+    surf.blit(text,(200 - size[0] // 2,50 - size[1] // 2))
+    
+    pygame.draw.rect(surf, (r, g, b), (50, 210, 300, 80))
+
+    for _ in range(255):
+        pygame.draw.rect(surf, (255 - _, g, b) if r != 255 - _ else (0, 0, 0), (400, 400 / 255 * _, 16, 400 / 255 + 1))
+        pygame.draw.rect(surf, (r, 255 - _, b) if g != 255 - _ else (0, 0, 0), (416, 400 / 255 * _, 16, 400 / 255 + 1))
+        pygame.draw.rect(surf, (r, g, 255 - _) if b != 255 - _ else (0, 0, 0), (432, 400 / 255 * _, 16, 400 / 255 + 1))
+        
+    pygame.display.update()
+    
+    #s = input('r,g,b>>').split(',')
+    #_ = [float(s[0]), float(s[1]), float(s[2])]
+    #d = sess.run(logits, feed_dict={X: [_]})
+    #print(int(_[0]), int(_[1]) , int(_[2]) ,cor_name[d])

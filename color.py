@@ -13,11 +13,11 @@ for _ in s:
 f_nam.close()
 
 data = open('colors.dat', 'a')
-name = open('names.dat', 'w')
+name = open('names.dat', 'a')
 
 
 
-for _ in range(100):
+for _ in range(32):
     pygame.event.get()
     r = random.randint(0,255)
     g = random.randint(0,255)
